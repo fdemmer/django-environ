@@ -2,6 +2,7 @@
 Django-environ allows you to utilize 12factor inspired environment
 variables to configure your Django application.
 """
+import ast
 import json
 import logging
 import os
@@ -31,8 +32,20 @@ __version__ = tuple(VERSION.split('.'))
 def _cast_int(v):
     return int(v) if hasattr(v, 'isdigit') and v.isdigit() else v
 
+
 def _cast_urlstr(v):
     return urllib.parse.unquote_plus(v) if isinstance(v, str) else v
+
+
+def _cast(value):
+    # Safely evaluate an expression node or a string containing a Python
+    # literal or container display.
+    # https://docs.python.org/3/library/ast.html#ast.literal_eval
+    try:
+        return ast.literal_eval(value)
+    except ValueError:
+        return value
+
 
 # back compatibility with redis_cache package
 DJANGO_REDIS_DRIVER = 'django_redis.cache.RedisCache'
@@ -400,7 +413,7 @@ class Env(object):
             config_options = {}
             for k, v in urllib.parse.parse_qs(url.query).items():
                 if k.upper() in cls._DB_BASE_OPTIONS:
-                    config.update({k.upper(): _cast_int(v[0])})
+                    config.update({k.upper(): _cast(v[0])})
                 else:
                     config_options.update({k: _cast_int(v[0])})
             config['OPTIONS'] = config_options
@@ -456,7 +469,7 @@ class Env(object):
         if url.query:
             config_options = {}
             for k, v in urllib.parse.parse_qs(url.query).items():
-                opt = {k.upper(): _cast_int(v[0])}
+                opt = {k.upper(): _cast(v[0])}
                 if k.upper() in cls._CACHE_BASE_OPTIONS:
                     config.update(opt)
                 else:
