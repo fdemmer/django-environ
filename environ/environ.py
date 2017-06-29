@@ -23,7 +23,7 @@ from six import string_types
 logger = logging.getLogger(__name__)
 
 
-VERSION = '0.4.4-fdemmer.1'
+VERSION = '0.4.4-fdemmer.2'
 __author__ = 'joke2k'
 __version__ = tuple(VERSION.split('.'))
 
