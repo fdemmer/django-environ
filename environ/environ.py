@@ -604,6 +604,12 @@ class Env(object):
     def read_env(cls, env_file=None, **overrides):
         """Read a .env file into os.environ.
 
+        Existing environment variables take precedent and are NOT overwritten
+        by the file content.
+
+        Key/value pairs given as `overrides` DO overwrite existing variables.
+        Keep in mind, that variable names are case sensitive, when overriding!
+
         If not given a path to a dotenv path, does filthy magic stack backtracking
         to find manage.py and then find the dotenv.
 
@@ -643,9 +649,9 @@ class Env(object):
                     val = re.sub(r'\\(.)', r'\1', m3.group(1))
                 cls.ENVIRON.setdefault(key, str(val))
 
-        # set defaults
+        # set overrides
         for key, value in overrides.items():
-            cls.ENVIRON.setdefault(key, value)
+            cls.ENVIRON[key] = value
 
 
 class Path(object):
